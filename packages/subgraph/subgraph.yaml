@@ -1,0 +1,70 @@
+specVersion: 0.0.4
+description: Subgraph for the Nation3 Jurisdiction smart contracts stack
+repository: https://github.com/nation3/jurisdiction
+features:
+  - ipfsOnEthereumContracts
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: CollateralAgreementFramework
+    network: goerli
+    source:
+      abi: CollateralAgreementFramework
+      address: "0x710617547D96573520b5f38668168DaFDBD9EA83"
+      startBlock: 8458090
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - AgreementFramework
+        - Agreement
+        - AgreementPosition
+        - Dispute
+      abis:
+        - name: CollateralAgreementFramework
+          file: ./abis/CollateralAgreementFramework.json
+      eventHandlers:
+        - event: AgreementCreated(indexed bytes32,bytes32,uint256,string,address)
+          handler: handleAgreementCreated
+        - event: AgreementJoined(indexed bytes32,indexed address,uint256)
+          handler: handleAgreementJoined
+        - event: AgreementPositionUpdated(indexed bytes32,indexed address,uint256,uint8)
+          handler: handleAgreementPositionUpdated
+        - event: AgreementFinalized(indexed bytes32)
+          handler: handleAgreementFinalized
+        - event: AgreementDisputed(indexed bytes32,indexed address)
+          handler: handleAgreementDisputed
+      callHandlers:
+        - function: setUp(address,(address,uint256,address))
+          handler: handleFrameworkSetup
+      file: ./src/collateral-agreement-framework.ts
+  - kind: ethereum
+    name: Arbitrator
+    network: goerli
+    source:
+      abi: Arbitrator
+      address: "0x1dBEFF62DFa113f7254AaB5772F1AC6E66F94e7e"
+      startBlock: 8362795
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Dispute
+        - Resolution
+      abis:
+        - name: Arbitrator
+          file: ./abis/IArbitrator.json
+      eventHandlers:
+        - event: ResolutionSubmitted(indexed address,indexed bytes32,indexed
+            bytes32,bytes32)
+          handler: handleResolutionSubmitted
+        - event: ResolutionAppealed(indexed bytes32,bytes32,address)
+          handler: handleResolutionAppealed
+        - event: ResolutionEndorsed(indexed bytes32,bytes32)
+          handler: handleResolutionEndorsed
+        - event: ResolutionExecuted(indexed bytes32,bytes32)
+          handler: handleResolutionExecuted
+      file: ./src/arbitrator.ts
